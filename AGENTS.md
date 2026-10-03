@@ -47,8 +47,10 @@ nix develop && make check   # dev loop (no nix)
 
 ## Reference
 
-- Canonical shape: `../fstar-basen` (its `default.nix`, `flake.nix`, `Makefile`,
-  `Data.BaseN.Pulse`) is the library-with-codec-dep reference this repo mirrors.
+- Canonical shape: `fstar-basen` (its `default.nix`, `flake.nix`, `Makefile`,
+  `Data.BaseN.Pulse`) is the library-with-codec-dep reference this repo
+  mirrors (see `https://github.com/dysinger/fstar-basen`).
 - F\* skills: `~/.pi/agent/skills/fstar/fstar-2026.09.20/SKILL.md` (Custard/Pulse)
   and `fstar-proofs` §11/§15/§18/§58 (Seq opacity + the 16-byte bridge).
-- OpenSpec change: `xeno/openspec/changes/round2-custard-migration/`.
+- OpenSpec change (monorepo): `round2-custard-migration` (origin repo
+  `openspec/changes/`).

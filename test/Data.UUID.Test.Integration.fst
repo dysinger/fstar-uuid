@@ -31,6 +31,21 @@ let _uuid_example = uuid_example
 let _uuid_nil = uuid_nil
 
 
+(** Codec + accessors (protected against deletion) *)
+
+
+(** [uuid_codec] *)
+let _uuid_codec = uuid_codec
+(** [decode_uuid] *)
+let _decode_uuid = decode_uuid
+(** [encode_uuid] *)
+let _encode_uuid = encode_uuid
+(** [uuid_variant] *)
+let _uuid_variant = uuid_variant
+(** [uuid_version] *)
+let _uuid_version = uuid_version
+
+
 (** Accessor range lemmas *)
 
 
@@ -67,6 +82,13 @@ let _lemma_pulse_uuid16_roundtrip = lemma_pulse_uuid16_roundtrip
 let _encode_uuid16 = encode_uuid16
 (** [decode_uuid16] *)
 let _decode_uuid16 = decode_uuid16
+
+
+(* The Pulse spec mirrors [decode16_spec]/[encode16_spec]/[uuid16_of_indices]
+   are [noextract] and are NOT given direct value anchors: they are
+   transitively covered by [lemma_decode16_encode16_spec] (bound above), which
+   is the same policy as [fstar-basen] (its [decode_base16_spec] etc. are
+   covered by their roundtrip lemmas, not anchored directly). *)
 
 
 #pop-options

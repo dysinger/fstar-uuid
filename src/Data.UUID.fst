@@ -62,7 +62,7 @@ type uuid = {
 (* ── Constants ──────────────────────────────────────────────────────── *)
 
 
-(** A fixed non-nil UUID (version 4, variant 10xx / RFC 4122) for concrete
+(** A fixed non-nil UUID (version 4, variant 10xx / RFC 9562 §4.1/§4.2) for concrete
     vectors: `00112233-4455-4677-8899-aabbccddeeff`.
 
     The version is the high nibble of the 7th byte (0x46 → 4); the variant is
@@ -111,7 +111,13 @@ let uuid_version (u: uuid) : nat =
 
     Built from [count 16 token] (a 16-byte run) lifted to the [uuid] record
     through [equiv_map].  The combinator's [roundtrip] field carries the
-    generic proof; the [uuid] lifting functions are exact inverses. *)
+    generic proof; the [uuid] lifting functions are exact inverses.
+
+    The scoped [--z3rlimit 40] is a targeted raise over the Makefile's global
+    120 default: the 16-element list pattern-match in the [equiv_map] pruning
+    function dispatches 17 obligations, and 40 keeps the whole codec's VCs
+    under a single stable budget without relying on the (now-removed)
+    `--split_queries`.) *)
 #push-options "--z3rlimit 40"
 let uuid_codec : codec uuid =
   let raw : codec (list byte) = count 16 token in
