@@ -1,7 +1,7 @@
 <div align="center">
   <h1>License</h1>
-  <p><strong>uuid</strong> — a verified RFC 9562 UUID codec library
-  that extracts to C, OCaml, and F# via Custard.</p>
+  <p><strong>uuid</strong> — a formally verified, RFC 9562 UUID
+  codec library written in F\*.</p>
 </div>
 
 ---
