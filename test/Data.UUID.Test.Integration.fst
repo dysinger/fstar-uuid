@@ -2,7 +2,7 @@
    SPDX-License-Identifier: AGPL-3.0-or-later *)
 
 (**
-Data.UUID.Test.Integration — Binds all uuid lemmas + tests.
+Data.UUID.Test.Integration — Binds all uuid lemmas, values, and tests.
 
 If any lemma or test function is deleted or renamed, F* verification fails.
 This guarantees mechanically-enforced test coverage.
@@ -22,7 +22,16 @@ open Data.UUID.Pulse
 #push-options "--admit_smt_queries true"
 
 
-(** Pure accessor lemmas *)
+(** Values *)
+
+
+(** [uuid_example] *)
+let _uuid_example = uuid_example
+(** [uuid_nil] *)
+let _uuid_nil = uuid_nil
+
+
+(** Accessor range lemmas *)
 
 
 (** [lemma_uuid_variant_range] *)
@@ -31,32 +40,22 @@ let _lemma_uuid_variant_range = lemma_uuid_variant_range
 let _lemma_uuid_version_range = lemma_uuid_version_range
 
 
-(** Concrete vector lemmas *)
+(** Concrete-vector lemmas *)
 
 
-(** [lemma_uuid_nil_variant_version] *)
-let _lemma_uuid_nil_variant_version = lemma_uuid_nil_variant_version
-(** [lemma_uuid_example_version] *)
-let _lemma_uuid_example_version = lemma_uuid_example_version
 (** [lemma_uuid_example_variant] *)
 let _lemma_uuid_example_variant = lemma_uuid_example_variant
+(** [lemma_uuid_example_version] *)
+let _lemma_uuid_example_version = lemma_uuid_example_version
+(** [lemma_uuid_nil_variant_version] *)
+let _lemma_uuid_nil_variant_version = lemma_uuid_nil_variant_version
 
 
-(** Pure spec roundtrip (the codec combinator's own proof is generic; the
-    pure spec mirrors it at the [list byte] level). *)
+(** Pulse roundtrip *)
 
 
 (** [lemma_decode16_encode16_spec] *)
 let _lemma_decode16_encode16_spec = lemma_decode16_encode16_spec
-
-
-(** Concrete values *)
-
-
-(** [uuid_nil] *)
-let _uuid_nil = uuid_nil
-(** [uuid_example] *)
-let _uuid_example = uuid_example
 
 
 #pop-options

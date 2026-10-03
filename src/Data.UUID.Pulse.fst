@@ -17,17 +17,20 @@ Written for F* v2026.09.20 (Custard `--custard_backend C`).  Zero admits.
 
 @section Type
 - [uuid16] — a flat 16-byte C-representable record (not the nested [uuid])
+- [opt_uuid16] — the tagged decode result
 
 @section Spec
-- [encode16_spec] / [decode16_spec] — the pure mirror, over a [list byte]
-
-@section Encode
-- [encode_uuid16] — writes the 16 bytes, returns [16ul]
+- [decode16_spec] / [encode16_spec] — the pure mirror, over a [list byte]
+- [uuid16_of_indices] — pointwise reconstruction from [Seq.index]
 
 @section Decode
 - [decode_uuid16] — reads the 16 bytes, returns [OU16_Some]
 
+@section Encode
+- [encode_uuid16] — writes the 16 bytes, returns [16ul]
+
 @section Roundtrip
+- [lemma_decode16_encode16_spec] — the pure spec roundtrip
 - [lemma_pulse_uuid16_roundtrip] — encode then decode preserves the value
 *)
 module Data.UUID.Pulse
@@ -47,7 +50,7 @@ open FStar.Int.Cast
 module DU = Data.UUID
 
 
-(* ── Types ─────────────────────────────────────────────────────────── *)
+(* ── Type ───────────────────────────────────────────────────────────── *)
 
 
 (** [uuid16] — a flat 16-byte record of an RFC 9562 UUID.
@@ -70,16 +73,7 @@ type opt_uuid16 =
   | OU16_Some of (uuid16 & U32.t)
 
 
-(* ── Pure spec (noextract) ─────────────────────────────────────────── *)
-
-
-(** [encode16_spec] — flatten a [uuid16] to its 16 raw bytes (in order). *)
-noextract
-let encode16_spec (u: uuid16) : list U8.t =
-  [u.byte0; u.byte1; u.byte2; u.byte3;
-   u.byte4; u.byte5; u.byte6; u.byte7;
-   u.byte8; u.byte9; u.byte10; u.byte11;
-   u.byte12; u.byte13; u.byte14; u.byte15]
+(* ── Pure spec (noextract) ──────────────────────────────────────────── *)
 
 
 (** [decode16_spec] — assemble a [uuid16] from 16 raw bytes; [None] for any
@@ -95,13 +89,13 @@ let decode16_spec (bs: list U8.t) : option (uuid16 & U32.t) =
   | _ -> None
 
 
-(** [decode16_result_spec] — lift [decode16_spec] into the tagged result
-    [opt_uuid16]. *)
+(** [encode16_spec] — flatten a [uuid16] to its 16 raw bytes (in order). *)
 noextract
-let decode16_result_spec (bs: list U8.t) : opt_uuid16 =
-  match decode16_spec bs with
-  | None -> OU16_None
-  | Some (u, n) -> OU16_Some (u, n)
+let encode16_spec (u: uuid16) : list U8.t =
+  [u.byte0; u.byte1; u.byte2; u.byte3;
+   u.byte4; u.byte5; u.byte6; u.byte7;
+   u.byte8; u.byte9; u.byte10; u.byte11;
+   u.byte12; u.byte13; u.byte14; u.byte15]
 
 
 (** [uuid16_of_indices] — the [uuid16] whose [byteN] is [Seq.index s (off+N)].
@@ -119,7 +113,74 @@ let uuid16_of_indices (s: Seq.seq U8.t) (off: nat { off + 15 < Seq.length s }) :
 }
 
 
-(* ── Encode ────────────────────────────────────────────────────────── *)
+(* ── Decode ─────────────────────────────────────────────────────────── *)
+
+
+(** [decode_uuid16] reads the 16 bytes at [off] from [buf].
+
+    There is no byte-level validation (every byte is a legal UUID byte); the
+    bounds precondition ensures the read is in-bounds, so the result is always
+    [OU16_Some].  The [ensures] states the result POINTWISE (each [byteN] is
+    [Seq.index s0 (off+N)]), avoiding the [seq_to_list]/[slice] chain.
+
+    @param buf The source buffer (must hold at least 16 bytes at [off]).
+    @param off The read offset.
+    @returns [OU16_Some (uuid16_of_indices s0 off, 16ul)]. *)
+fn decode_uuid16 (buf: A.array U8.t) (off: U32.t)
+    (#s0: erased (Seq.seq U8.t))
+    requires
+      A.pts_to buf s0 **
+      pure (U32.v off + 16 <= A.length buf /\ U32.v off + 15 < 4294967296 /\
+            A.length buf == Seq.length s0)
+    returns r: opt_uuid16
+    ensures
+      A.pts_to buf s0 **
+      pure (
+        A.length buf == Seq.length s0 /\
+        U32.v off + 16 <= A.length buf /\
+        r == OU16_Some (uuid16_of_indices s0 (U32.v off), 16ul))
+{
+  A.pts_to_len buf;
+  let j0 = US.uint32_to_sizet off;
+  let j1 = US.uint32_to_sizet (U32.add off 1ul);
+  let j2 = US.uint32_to_sizet (U32.add off 2ul);
+  let j3 = US.uint32_to_sizet (U32.add off 3ul);
+  let j4 = US.uint32_to_sizet (U32.add off 4ul);
+  let j5 = US.uint32_to_sizet (U32.add off 5ul);
+  let j6 = US.uint32_to_sizet (U32.add off 6ul);
+  let j7 = US.uint32_to_sizet (U32.add off 7ul);
+  let j8 = US.uint32_to_sizet (U32.add off 8ul);
+  let j9 = US.uint32_to_sizet (U32.add off 9ul);
+  let j10 = US.uint32_to_sizet (U32.add off 10ul);
+  let j11 = US.uint32_to_sizet (U32.add off 11ul);
+  let j12 = US.uint32_to_sizet (U32.add off 12ul);
+  let j13 = US.uint32_to_sizet (U32.add off 13ul);
+  let j14 = US.uint32_to_sizet (U32.add off 14ul);
+  let j15 = US.uint32_to_sizet (U32.add off 15ul);
+  let b0 = buf.(j0);
+  let b1 = buf.(j1);
+  let b2 = buf.(j2);
+  let b3 = buf.(j3);
+  let b4 = buf.(j4);
+  let b5 = buf.(j5);
+  let b6 = buf.(j6);
+  let b7 = buf.(j7);
+  let b8 = buf.(j8);
+  let b9 = buf.(j9);
+  let b10 = buf.(j10);
+  let b11 = buf.(j11);
+  let b12 = buf.(j12);
+  let b13 = buf.(j13);
+  let b14 = buf.(j14);
+  let b15 = buf.(j15);
+  OU16_Some ({ byte0 = b0; byte1 = b1; byte2 = b2; byte3 = b3;
+               byte4 = b4; byte5 = b5; byte6 = b6; byte7 = b7;
+               byte8 = b8; byte9 = b9; byte10 = b10; byte11 = b11;
+               byte12 = b12; byte13 = b13; byte14 = b14; byte15 = b15 }, 16ul)
+}
+
+
+(* ── Encode ─────────────────────────────────────────────────────────── *)
 
 
 (** [encode_uuid16] writes the 16 bytes of [u] into [buf] at [off], pointwise.
@@ -194,74 +255,7 @@ fn encode_uuid16 (u: uuid16) (buf: A.array U8.t) (off: U32.t)
 }
 
 
-(* ── Decode ────────────────────────────────────────────────────────── *)
-
-
-(** [decode_uuid16] reads the 16 bytes at [off] from [buf].
-
-    There is no byte-level validation (every byte is a legal UUID byte); the
-    bounds precondition ensures the read is in-bounds, so the result is always
-    [OU16_Some].  The [ensures] states the result POINTWISE (each [byteN] is
-    [Seq.index s0 (off+N)]), avoiding the [seq_to_list]/[slice] chain.
-
-    @param buf The source buffer (must hold at least 16 bytes at [off]).
-    @param off The read offset.
-    @returns [OU16_Some (uuid16_of_indices s0 off, 16ul)]. *)
-fn decode_uuid16 (buf: A.array U8.t) (off: U32.t)
-    (#s0: erased (Seq.seq U8.t))
-    requires
-      A.pts_to buf s0 **
-      pure (U32.v off + 16 <= A.length buf /\ U32.v off + 15 < 4294967296 /\
-            A.length buf == Seq.length s0)
-    returns r: opt_uuid16
-    ensures
-      A.pts_to buf s0 **
-      pure (
-        A.length buf == Seq.length s0 /\
-        U32.v off + 16 <= A.length buf /\
-        r == OU16_Some (uuid16_of_indices s0 (U32.v off), 16ul))
-{
-  A.pts_to_len buf;
-  let j0 = US.uint32_to_sizet off;
-  let j1 = US.uint32_to_sizet (U32.add off 1ul);
-  let j2 = US.uint32_to_sizet (U32.add off 2ul);
-  let j3 = US.uint32_to_sizet (U32.add off 3ul);
-  let j4 = US.uint32_to_sizet (U32.add off 4ul);
-  let j5 = US.uint32_to_sizet (U32.add off 5ul);
-  let j6 = US.uint32_to_sizet (U32.add off 6ul);
-  let j7 = US.uint32_to_sizet (U32.add off 7ul);
-  let j8 = US.uint32_to_sizet (U32.add off 8ul);
-  let j9 = US.uint32_to_sizet (U32.add off 9ul);
-  let j10 = US.uint32_to_sizet (U32.add off 10ul);
-  let j11 = US.uint32_to_sizet (U32.add off 11ul);
-  let j12 = US.uint32_to_sizet (U32.add off 12ul);
-  let j13 = US.uint32_to_sizet (U32.add off 13ul);
-  let j14 = US.uint32_to_sizet (U32.add off 14ul);
-  let j15 = US.uint32_to_sizet (U32.add off 15ul);
-  let b0 = buf.(j0);
-  let b1 = buf.(j1);
-  let b2 = buf.(j2);
-  let b3 = buf.(j3);
-  let b4 = buf.(j4);
-  let b5 = buf.(j5);
-  let b6 = buf.(j6);
-  let b7 = buf.(j7);
-  let b8 = buf.(j8);
-  let b9 = buf.(j9);
-  let b10 = buf.(j10);
-  let b11 = buf.(j11);
-  let b12 = buf.(j12);
-  let b13 = buf.(j13);
-  let b14 = buf.(j14);
-  let b15 = buf.(j15);
-  OU16_Some ({ byte0 = b0; byte1 = b1; byte2 = b2; byte3 = b3;
-               byte4 = b4; byte5 = b5; byte6 = b6; byte7 = b7;
-               byte8 = b8; byte9 = b9; byte10 = b10; byte11 = b11;
-               byte12 = b12; byte13 = b13; byte14 = b14; byte15 = b15 }, 16ul)
-}
-
-
-(* ── Pure bridge lemma (noextract) ─────────────────────────────────── *)
+(* ── Roundtrip ──────────────────────────────────────────────────────── *)
 
 
 (** [lemma_decode16_encode16_spec]: the pure spec roundtrip — decoding the
@@ -270,9 +264,6 @@ noextract
 let lemma_decode16_encode16_spec (u: uuid16)
   : Lemma (decode16_spec (encode16_spec u) == Some (u, 16ul))
   = ()
-
-
-(* ── Roundtrip ─────────────────────────────────────────────────────── *)
 
 
 (** [lemma_pulse_uuid16_roundtrip]: encode then decode preserves the value.

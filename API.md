@@ -26,17 +26,17 @@
 
 | Function | Signature | Description |
 |----------|-----------|-------------|
-| `encode_uuid` | `uuid -> byte_seq` | raw 16-byte encoding |
 | `decode_uuid` | `byte_seq -> option uuid` | raw 16-byte decoding |
+| `encode_uuid` | `uuid -> byte_seq` | raw 16-byte encoding |
 
 ## Pulse leaf
 
 | Function | Signature | Description |
 |----------|-----------|-------------|
-| `encode_uuid16` | `fn (uuid16) (A.array U8.t) (U32.t) -> U32.t` | write 16 bytes, returns `16ul` |
 | `decode_uuid16` | `fn (A.array U8.t) (U32.t) -> opt_uuid16` | read 16 bytes |
+| `encode_uuid16` | `fn (uuid16) (A.array U8.t) (U32.t) -> U32.t` | write 16 bytes, returns `16ul` |
 | `lemma_pulse_uuid16_roundtrip` | Pulse `fn` | encode then decode preserves the value |
-| `encode16_spec` / `decode16_spec` | `noextract` pure | the byte-level spec mirror |
+| `decode16_spec` / `encode16_spec` | `noextract` pure | the byte-level spec mirror |
 | `uuid16_of_indices` | `noextract` pure | pointwise reconstruction from `Seq.index` |
 
 ## Lemmas
