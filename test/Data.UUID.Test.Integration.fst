@@ -56,6 +56,17 @@ let _lemma_uuid_nil_variant_version = lemma_uuid_nil_variant_version
 
 (** [lemma_decode16_encode16_spec] *)
 let _lemma_decode16_encode16_spec = lemma_decode16_encode16_spec
+(** [lemma_pulse_uuid16_roundtrip] *)
+let _lemma_pulse_uuid16_roundtrip = lemma_pulse_uuid16_roundtrip
+
+
+(** Pulse encode/decode functions — mechanically protected against deletion *)
+
+
+(** [encode_uuid16] *)
+let _encode_uuid16 = encode_uuid16
+(** [decode_uuid16] *)
+let _decode_uuid16 = decode_uuid16
 
 
 #pop-options

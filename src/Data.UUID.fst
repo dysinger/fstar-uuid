@@ -40,7 +40,6 @@ open Data.Codec
 open Data.Codec.Types
 
 module U8 = FStar.UInt8
-module Seq = FStar.Seq
 
 
 (* ── Type ───────────────────────────────────────────────────────────── *)

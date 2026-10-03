@@ -47,8 +47,6 @@ module Seq = FStar.Seq
 open FStar.Seq
 open FStar.Int.Cast
 
-module DU = Data.UUID
-
 
 (* ── Type ───────────────────────────────────────────────────────────── *)
 
